@@ -11,7 +11,7 @@ This IPI installation won't need that you configure an external load balancer, a
 
 You won't need to configure a Load Balancer because in the KVM an iptables rule will be configured to forward 6443 to first master and 443 and 80 to first worker. If you want to run HA tests you will need to install a haproxy and reconfigure that rules to point to the load balancer VIP. If you are running the KVM locally, you will get HA for masters since the dnsmasq will round robin the IP bind to the dns name.
 
-One more thing to be taken into account is that due https://github.com/openshift/installer/issues/1007 we need to configure *.apps.basedomain instad of *.apps.< CLUSTERNAME >.basedomain, so bear in mind that change when trying to access your APPs.
+One more thing to be taken into account is that due https://github.com/openshift/installer/issues/1007 we need to configure *.apps.basedomain instead of *.apps.< CLUSTERNAME >.basedomain, so bear in mind that change and do not include the cluster name when trying to access your APPs.
 
 
 Deploying 
