@@ -1,0 +1,49 @@
+---
+# defaults file for ocp-libvirt
+
+
+
+
+#########################################################
+## KVM config
+kvm_install: "false"
+kvm_configure: "false"
+kvm_libvirt_network_gw: "192.168.122.1"
+kvm_firewall: "iptables"
+kvm_interface: "eth0"
+
+
+#########################################################
+## OCP install config
+ocp_prepare: "false"
+ocp_install: "false"
+
+ocp_install_file_path: "../config/install-config.yaml"
+ocp_install_path: "{{ ansible_env.HOME }}/ocp"
+
+ocp_mirror: "https://mirror.openshift.com/pub/openshift-v4/clients/ocp"
+ocp_release: "4.4.0"
+
+
+
+vms_memory: 7168
+vms_vcpu: 4
+
+
+
+## This is fixed right not, do not change
+ocp_api_vip: "192.168.126.11"
+ocp_apps_vip: "192.168.126.51"
+ocp_cluster_net_gw: "192.168.126.1"
+
+
+## VARS because we have to build the installer (no default libvirt support)
+ocp_openshift_installer_repo: "https://github.com/openshift/installer"
+ocp_git_branch: "release-4.4"
+
+ocp_install_install_release_image_override: "quay.io/openshift-release-dev/ocp-release:4.4.0-rc.8-x86_64"
+
+
+
+
+

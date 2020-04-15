@@ -1,0 +1,10 @@
+---
+# tasks file for ocp-libvirt
+
+- include_vars: "{{ ocp_install_file_path }}"
+
+- include_tasks: "kvm_centos.yml"
+  when: kvm_install == "true" or kvm_configure == "true"
+
+- include_tasks: "ocp.yml"
+  when: ocp_prepare == "true" or ocp_install == "true"
