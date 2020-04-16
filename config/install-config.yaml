@@ -5,13 +5,13 @@ compute:
   hyperthreading: Enabled
   name: worker
   platform: {}
-  replicas: 0
+  replicas: 2
 controlPlane:
   architecture: amd64
   hyperthreading: Enabled
   name: master
   platform: {}
-  replicas: 1
+  replicas: 3
 metadata:
   creationTimestamp: null
   name: ocp

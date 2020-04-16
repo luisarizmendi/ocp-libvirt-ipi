@@ -12,8 +12,8 @@ kvm_libvirt_network_gw: "192.168.122.1"
 kvm_firewall: "iptables"
 kvm_interface: "eth0"
 
-nfs_storage: "false"
-lb: "false"
+nfs_storage: "true"
+lb: "true"
 
 #########################################################
 ## OCP install config

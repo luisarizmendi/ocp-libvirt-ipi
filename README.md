@@ -1,3 +1,11 @@
+NOTE about using a single Master
+=====================
+
+in OCP 4.4 there is a BUG that prevents the installation to complete. You can workaround with manual steps while deploying:
+
+https://bugzilla.redhat.com/show_bug.cgi?id=1805034
+
+
 OpenShift libvirt IPI
 =====================
 
@@ -7,9 +15,9 @@ It will use by default 7GB of RAM and 4 vcores per node (minimum 2 nodes, so 14G
 
 Steps are based on https://github.com/openshift/installer/blob/master/docs/dev/libvirt/README.md
 
-This IPI installation won't need that you configure an external load balancer, any HTTP server or that you configure SRV in an external DNS, you will need to configure just the api and the apps wildcard (you can always play with the /etc/hosts if you don't have a chance to configure a DNS)
+This IPI installation won't need that you configure an external load balancer (although you can install it with these scritps), any HTTP server or that you configure SRV in an external DNS, you will need to configure just the api and the apps wildcard (you can always play with the /etc/hosts if you don't have a chance to configure a DNS)
 
-You won't need to configure a Load Balancer because in the KVM an iptables rule will be configured to forward 6443 to first master and 443 and 80 to first worker. If you want to run HA tests you will need to install a haproxy and reconfigure that rules to point to the load balancer VIP. If you are running the KVM locally, you will get HA for masters since the dnsmasq will round robin the IP bind to the dns name.
+You won't need to configure a Load Balancer because in the KVM an iptables rule will be configured to forward 6443 to first master and 443 and 80 to first worker. If you want to run HA tests you will need to install a haproxy and reconfigure that rules to point to the load balancer VIP. If you are running the KVM locally, you will get HA for masters since the dnsmasq will round robin the IP bind to the dns name. You can also configure a load balancer as part of the installation (see "other configs" section)
 
 One more thing to be taken into account is that due https://github.com/openshift/installer/issues/1007 we need to configure *.apps.basedomain instead of *.apps.< CLUSTERNAME >.basedomain, so bear in mind that change and do not include the cluster name when trying to access your APPs.
 
@@ -54,3 +62,5 @@ If you have enough CPU and RAM you can change the default resources configuring 
 By default NFS storage and a storageclass for dynamic PV provisioning (no supported in Openshift, but it works for testing). You can disable it by configuring `nfs_storage` to `false`. In that case ephemeral storage will be configured in the internal registry.
 
 Local users will be created (ie. clusteradmin / R3dhat01). You can disable it by configuring `ocp_create_users` to `false` 
+
+You disable the configuration of the load balance service (default is on) by changing `lb` to `false` in the `[kvm:vars]` section of the inventory

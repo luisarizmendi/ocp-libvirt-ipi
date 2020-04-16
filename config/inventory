@@ -11,7 +11,7 @@ kvm_configure=true
 kvm_interface=< NIC >
 
 nfs_storage="true"
-lb="false"
+lb="true"
 
 [installer:vars]
 ocp_prepare=true
