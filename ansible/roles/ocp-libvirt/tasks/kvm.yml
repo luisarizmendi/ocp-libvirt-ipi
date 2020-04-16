@@ -205,16 +205,10 @@
         iptables -I INPUT 1 -p tcp -s 192.168.126.0/24 -d {{ kvm_libvirt_network_gw }} -j ACCEPT -m comment --comment 'Allow insecure libvirt clients'
         iptables -I INPUT 1 -p tcp -s {{ hostvars['installer-host']['ansible_host'] }} -d {{ hostvars['kvm-host']['ansible_host'] }} --dport 16509 -j ACCEPT -m comment --comment 'Allow insecure libvirt clients'
         # Publishing
-        if [ {{ controlPlane.replicas }} -ne 1 ]
+        if [ {{ compute.0.replicas }} -ne 0 ]
         then
-          if [ {{ compute.0.replicas }} -ne 0 ]
-          then
-            API_VIP={{ ocp_api_vip }}
-            APPS_VIP={{ ocp_apps_vip }}
-          else
-            API_VIP={{ ocp_api_vip }}
-            APPS_VIP={{ ocp_api_vip }}
-          fi
+          API_VIP={{ ocp_api_vip }}
+          APPS_VIP={{ ocp_apps_vip }}
         else
           API_VIP={{ ocp_api_vip }}
           APPS_VIP={{ ocp_api_vip }}
@@ -234,18 +228,18 @@
         iptables -D PREROUTING -t nat -i {{ kvm_interface }} -p tcp --dport 80 -j DNAT --to $APPS_VIP:80
         iptables -D FORWARD -p tcp -d $APPS_VIP --dport 80 -j ACCEPT
         iptables -D FORWARD -i any -o any -j ACCEPT
+        iptables -D FORWARD 5
+        iptables -D FORWARD 4
         iptables -I FORWARD 1 -i any -o any -j ACCEPT
-        iptables -I INPUT 1 -p tcp  --dport 6443 -j ACCEPT
-        iptables -I INPUT 1 -p tcp  --dport 443 -j ACCEPT
-        iptables -I INPUT 1 -p tcp  --dport 80 -j ACCEPT
         iptables -I PREROUTING 1 -t nat -i {{ kvm_interface }} -p tcp --dport 6443 -j DNAT --to $API_VIP:6443
         iptables -I FORWARD 1 -p tcp -d $API_VIP --dport 6443 -j ACCEPT
         iptables -I PREROUTING 1 -t nat -i {{ kvm_interface }} -p tcp --dport 443 -j DNAT --to $APPS_VIP:443
         iptables -I FORWARD 1 -p tcp -d $APPS_VIP --dport 443 -j ACCEPT
         iptables -I PREROUTING 1  -t nat -i {{ kvm_interface }} -p tcp --dport 80 -j DNAT --to $APPS_VIP:80
         iptables -I FORWARD 1 -p tcp -d $APPS_VIP --dport 80 -j ACCEPT
-        #iptables -D FORWARD 5
-        #iptables -D FORWARD 4
+        iptables -I INPUT 1 -p tcp  --dport 6443 -j ACCEPT
+        iptables -I INPUT 1 -p tcp  --dport 443 -j ACCEPT
+        iptables -I INPUT 1 -p tcp  --dport 80 -j ACCEPT
         iptables-save > /etc/iptables.conf
       when: kvm_firewall == "iptables"
 
@@ -309,7 +303,6 @@
             content: |
               server=/{{ baseDomain }}/{{ ocp_cluster_net_gw }}
               address=/.apps.{{ baseDomain }}/{{ ocp_apps_vip  }}
-
         - name: Finish Host network configuration
           when: controlPlane.replicas == 1
           copy:
@@ -335,7 +328,9 @@
         name: NetworkManager
         state: reloaded
 
-
+    - name: Configure DNS external servers
+      shell: 'echo "nameserver 8.8.8.8" >> /etc/resolv.conf'
+      
  #   - name: restart network
  #     become: true
  #     systemd:

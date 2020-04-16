@@ -158,13 +158,24 @@
 #            sed -i 's/mastersSchedulable: false/mastersSchedulable: true/' {{ ocp_install_path }}/install//manifests/cluster-scheduler-02-config.yml
 
 
-    - name:  Install OpenShift
+############# BUG https://bugzilla.redhat.com/show_bug.cgi?id=1805034
+    - name: Copy patch for bug 1805034
+      when: controlPlane.replicas == 1
+      copy:
+        src: "single-master-patch.sh"
+        dest: "{{ ocp_install_path }}/single-master-patch.sh"
+        mode: '0775'
+#############
+
+    - name:  OpenShift install
     #  shell: "{{ ocp_install_path }}/artifacts/openshift-installer-{{ ocp_release }}/openshift-install create cluster --dir {{ ocp_install_path }}/install/"
     # With overrides
       shell: |
+        ############# BUG https://bugzilla.redhat.com/show_bug.cgi?id=1805034
+        {{ ocp_install_path }}/single-master-patch.sh &
+        #############
         export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ ocp_install_install_release_image_override }}
         {{ ocp_install_path }}/artifacts/openshift-installer-{{ ocp_release }}/openshift-install create cluster --dir {{ ocp_install_path }}/install/
-
 
 
 - name: OpenShift Post-Install
@@ -199,7 +210,7 @@
 
     - name: Copy post-install scripts
       copy:
-        src: "scripts/"
+        src: "post-install-scripts/"
         dest: "{{ ocp_install_path }}/post-install/"
 
 
