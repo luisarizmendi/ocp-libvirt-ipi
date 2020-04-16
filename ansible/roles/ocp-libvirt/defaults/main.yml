@@ -12,6 +12,8 @@ kvm_libvirt_network_gw: "192.168.122.1"
 kvm_firewall: "iptables"
 kvm_interface: "eth0"
 
+nfs_storage: "false"
+lb: "false"
 
 #########################################################
 ## OCP install config
@@ -44,6 +46,7 @@ ocp_git_branch: "release-4.4"
 ocp_install_install_release_image_override: "quay.io/openshift-release-dev/ocp-release:4.4.0-rc.8-x86_64"
 
 
+ocp_create_users: "true"
 
 
 

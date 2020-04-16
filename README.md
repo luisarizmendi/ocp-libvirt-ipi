@@ -13,6 +13,7 @@ You won't need to configure a Load Balancer because in the KVM an iptables rule 
 
 One more thing to be taken into account is that due https://github.com/openshift/installer/issues/1007 we need to configure *.apps.basedomain instead of *.apps.< CLUSTERNAME >.basedomain, so bear in mind that change and do not include the cluster name when trying to access your APPs.
 
+If you don't have enough resources to run the 3 masters 2 workers setup, you could configure just 1 master and X workers (scripts will change automatically the manifest to make it work) or even just 1 master and 0 workers (All-in-One setup), but in that case increase the default memory per node (7GB could not be enough to run everything).
 
 Deploying 
 =========
@@ -25,7 +26,7 @@ In install-config.yaml
 * KVM IP and bridge name (optional)
 * Cluster name and Domain (if your KVM is not local you can setup a < ip >.nip.io domain if you don't have a "real" domain name)
 * Public ssh key
-* Number of masters (1 or 3) and workers
+* Number of masters (1 or 3) and workers (1 or 2... more could be configured but then there is a chance that the router won't run on the first worker node where the iptables are forwarding, in that case you better have a loadbalancer configured)
 
 In inventory
 
@@ -49,3 +50,7 @@ Other configs
 The ansible playbooks will configure kvm as a previous step to the openshift install. You can skip this by changing the `kvm_install` and `kvm_configure` to `false` in the file config/inventory under the `[kvm:vars]` section.
 
 If you have enough CPU and RAM you can change the default resources configuring `vms_memory` and `vms_vcpu` under the `[installer:vars]` section (16GB would be a nice amount of memory instead of 7GB per VM).
+
+By default NFS storage and a storageclass for dynamic PV provisioning (no supported in Openshift, but it works for testing). You can disable it by configuring `nfs_storage` to `false`. In that case ephemeral storage will be configured in the internal registry.
+
+Local users will be created (ie. clusteradmin / R3dhat01). You can disable it by configuring `ocp_create_users` to `false` 

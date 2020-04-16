@@ -69,6 +69,81 @@
       failed_when: "result.rc != 0"
 
 
+    - name: Install Load Balancer
+      when: lb  == "true"
+      become: true
+      block:
+        - name: Install needed packages
+          yum:
+            name:
+              - haproxy
+            state: present
+
+        - name: Write out haproxy config file
+          template:
+            src: haproxy.cfg.j2
+            dest: /etc/haproxy/haproxy.cfg
+
+
+        - name: SEBool allow haproxy connect any port
+          ignore_errors: yes
+          shell: "setsebool -P haproxy_connect_any 1"
+
+        - name: Starting services
+          service:
+            name: "{{ item }}"
+            enabled: yes
+            state: restarted
+          with_items:
+            - haproxy
+  
+
+
+    - name: Install NFS
+      when: nfs_storage  == "true"
+      become: true
+      block:
+        - name: Install needed packages
+          yum:
+            state: latest
+            name: "{{ item }}"
+          with_items:
+            - nfs-utils
+            - rpcbind
+
+
+        - name: Create mountable dirs
+          ignore_errors: yes
+          file:
+            path: "{{ item }}"
+            state: directory
+            mode: 0777
+            owner: nfsnobody
+            group: nfsnobody
+          with_items:
+            - /export
+            - /export/ocp/
+            - /export/ocp/static
+            - /export/ocp/static/registry
+            - /export/ocp/dynamic
+
+        - name: FIX permissions
+          shell: |
+            chmod  777 /export/*
+
+        - name: Configure /etc/exports
+          copy:
+            dest: "/etc/exports"
+            content: |
+              /export/ocp	*(rw,sync,root_squash)
+
+        - name: Enable nfs-server
+          systemd:
+            name: nfs-server
+            state: restarted
+            enabled: True
+
+
 
 - name: Prepare KVM
   when: kvm_configure  == "true"
@@ -124,19 +199,55 @@
       become: true
       ignore_errors: yes
       shell: |
-        iptables -I INPUT -p tcp -s 192.168.126.0/24 -d {{ kvm_libvirt_network_gw }} --dport 16509 -j ACCEPT -m comment --comment 'Allow insecure libvirt clients'
-        iptables -I INPUT -p tcp -s {{ hostvars['installer-host']['ansible_host'] }} -d {{ hostvars['kvm-host']['ansible_host'] }} --dport 16509 -j ACCEPT -m comment --comment 'Allow insecure libvirt clients'
+        set -x
+        iptables -D INPUT -p tcp -s 192.168.126.0/24 -d {{ kvm_libvirt_network_gw }} -j ACCEPT -m comment --comment 'Allow insecure libvirt clients'
+        iptables -D INPUT -p tcp -s {{ hostvars['installer-host']['ansible_host'] }} -d {{ hostvars['kvm-host']['ansible_host'] }} --dport 16509 -j ACCEPT -m comment --comment 'Allow insecure libvirt clients'
+        iptables -I INPUT 1 -p tcp -s 192.168.126.0/24 -d {{ kvm_libvirt_network_gw }} -j ACCEPT -m comment --comment 'Allow insecure libvirt clients'
+        iptables -I INPUT 1 -p tcp -s {{ hostvars['installer-host']['ansible_host'] }} -d {{ hostvars['kvm-host']['ansible_host'] }} --dport 16509 -j ACCEPT -m comment --comment 'Allow insecure libvirt clients'
         # Publishing
-        iptables -A PREROUTING -t nat -i {{ kvm_interface }} -p tcp --dport 6443 -j DNAT --to {{ ocp_api_vip  }}:6443
-        iptables -A FORWARD -p tcp -d {{ ocp_api_vip  }} --dport 6443 -j ACCEPT
-        iptables -A PREROUTING -t nat -i {{ kvm_interface }} -p tcp --dport 443 -j DNAT --to {{ ocp_apps_vip  }}:443
-        iptables -A FORWARD -p tcp -d {{ ocp_apps_vip  }} --dport 443 -j ACCEPT
-        iptables -A PREROUTING -t nat -i {{ kvm_interface }} -p tcp --dport 80 -j DNAT --to {{ ocp_apps_vip  }}:80
-        iptables -A FORWARD -p tcp -d {{ ocp_apps_vip  }} --dport 80 -j ACCEPT
+        if [ {{ controlPlane.replicas }} -ne 1 ]
+        then
+          if [ {{ compute.0.replicas }} -ne 0 ]
+          then
+            API_VIP={{ ocp_api_vip }}
+            APPS_VIP={{ ocp_apps_vip }}
+          else
+            API_VIP={{ ocp_api_vip }}
+            APPS_VIP={{ ocp_api_vip }}
+          fi
+        else
+          API_VIP={{ ocp_api_vip }}
+          APPS_VIP={{ ocp_api_vip }}
+        fi
+        if [ {{ lb }} == "true" ]
+        then
+          API_VIP={{ ocp_cluster_net_gw }}
+          APPS_VIP={{ ocp_cluster_net_gw }}
+        fi
+        iptables -D INPUT -p tcp  --dport 6443 -j ACCEPT
+        iptables -D INPUT -p tcp  --dport 80 -j ACCEPT
+        iptables -D INPUT -p tcp  --dport 443 -j ACCEPT
+        iptables -D PREROUTING -t nat -i {{ kvm_interface }} -p tcp --dport 6443 -j DNAT --to $API_VIP:6443
+        iptables -D FORWARD -p tcp -d $API_VIP --dport 6443 -j ACCEPT
+        iptables -D PREROUTING -t nat -i {{ kvm_interface }} -p tcp --dport 443 -j DNAT --to $APPS_VIP:443
+        iptables -D FORWARD -p tcp -d $APPS_VIP --dport 443 -j ACCEPT
+        iptables -D PREROUTING -t nat -i {{ kvm_interface }} -p tcp --dport 80 -j DNAT --to $APPS_VIP:80
+        iptables -D FORWARD -p tcp -d $APPS_VIP --dport 80 -j ACCEPT
+        iptables -D FORWARD -i any -o any -j ACCEPT
         iptables -I FORWARD 1 -i any -o any -j ACCEPT
+        iptables -I INPUT 1 -p tcp  --dport 6443 -j ACCEPT
+        iptables -I INPUT 1 -p tcp  --dport 443 -j ACCEPT
+        iptables -I INPUT 1 -p tcp  --dport 80 -j ACCEPT
+        iptables -I PREROUTING 1 -t nat -i {{ kvm_interface }} -p tcp --dport 6443 -j DNAT --to $API_VIP:6443
+        iptables -I FORWARD 1 -p tcp -d $API_VIP --dport 6443 -j ACCEPT
+        iptables -I PREROUTING 1 -t nat -i {{ kvm_interface }} -p tcp --dport 443 -j DNAT --to $APPS_VIP:443
+        iptables -I FORWARD 1 -p tcp -d $APPS_VIP --dport 443 -j ACCEPT
+        iptables -I PREROUTING 1  -t nat -i {{ kvm_interface }} -p tcp --dport 80 -j DNAT --to $APPS_VIP:80
+        iptables -I FORWARD 1 -p tcp -d $APPS_VIP --dport 80 -j ACCEPT
+        #iptables -D FORWARD 5
+        #iptables -D FORWARD 4
         iptables-save > /etc/iptables.conf
       when: kvm_firewall == "iptables"
-
 
 
     - name: Configure Firewalld
@@ -186,14 +297,34 @@
 
 ## NOTE: We configure .apps.{{ baseDomain }}/{{ ocp_apps_vip  }} instead of .apps.{{ metadata.name }}.{{ baseDomain }}/{{ ocp_apps_vip  }} because of https://github.com/openshift/installer/issues/1007
 
-    - name: Finish Host network configuration
+
+    - name: DNS config without lb
+      when: lb  != "true"
+      become: true
+      block:
+        - name: Finish Host network configuration
+          when: controlPlane.replicas != 1
+          copy:
+            dest:  /etc/NetworkManager/dnsmasq.d/openshift.conf
+            content: |
+              server=/{{ baseDomain }}/{{ ocp_cluster_net_gw }}
+              address=/.apps.{{ baseDomain }}/{{ ocp_apps_vip  }}
+
+        - name: Finish Host network configuration
+          when: controlPlane.replicas == 1
+          copy:
+            dest:  /etc/NetworkManager/dnsmasq.d/openshift.conf
+            content: |
+              server=/{{ baseDomain }}/{{ ocp_cluster_net_gw }}
+              address=/.apps.{{ baseDomain }}/{{ ocp_api_vip  }}
+
+    - name: DNS config with lb
+      when: lb  == "true"
       copy:
         dest:  /etc/NetworkManager/dnsmasq.d/openshift.conf
         content: |
           server=/{{ baseDomain }}/{{ ocp_cluster_net_gw }}
-          address=/.apps.{{ baseDomain }}/{{ ocp_apps_vip  }}
-
-
+          address=/.apps.{{ baseDomain }}/{{ ocp_cluster_net_gw  }}
 
     - name: Configure DNS external servers
       shell: nmcli con mod {{ kvm_interface }} ipv4.dns "8.8.8.8 8.8.4.4"

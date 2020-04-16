@@ -3,7 +3,7 @@
 
 - include_vars: "{{ ocp_install_file_path }}"
 
-- include_tasks: "kvm_centos.yml"
+- include_tasks: "kvm.yml"
   when: kvm_install == "true" or kvm_configure == "true"
 
 - include_tasks: "ocp.yml"

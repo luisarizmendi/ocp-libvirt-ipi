@@ -121,12 +121,41 @@
   when: ocp_install == "true"
   block:
 
-## NOTE: We need to modify manifests because of https://github.com/openshift/installer/issues/1007 otherwise the console won't come up
-    - name:  Create and configure manifests
+
+    - name:  Create manifests
       shell: |
         {{ ocp_install_path }}/artifacts/openshift-installer-{{ ocp_release }}/openshift-install create manifests --dir {{ ocp_install_path }}/install/
+
+## NOTE: We need to modify manifests because of https://github.com/openshift/installer/issues/1007 otherwise the console won't come up
+    - name:  Configure manifests to solve issue 1007
+      shell: |
         sed -i 's/{{ metadata.name }}.//' {{ ocp_install_path }}/install//manifests/cluster-ingress-02-config.yml
 
+
+#    - name: Single Master configuration
+#      when: controlPlane.replicas == 1
+#      block:
+#        - name:  Configure ETCD to support single master
+#          blockinfile:
+#            path: "{{ ocp_install_path }}/install//manifests/cvo-overrides.yaml"
+#            block: |
+#              #
+#                overrides:
+#                - group: apps/v1
+#                  kind: Deployment
+#                  name: etcd-quorum-guard
+#                  namespace: openshift-machine-config-operator
+#                  unmanaged: true
+#        - name:  Reduce ETCD replicas
+#          shell: |
+#            echo ""
+
+#    - name: No Workers configuration
+#      when: compute.0.replicas == 0
+#      block:
+#        - name:  Configure manifests to support no worker nodes
+#          shell: |
+#            sed -i 's/mastersSchedulable: false/mastersSchedulable: true/' {{ ocp_install_path }}/install//manifests/cluster-scheduler-02-config.yml
 
 
     - name:  Install OpenShift
@@ -137,6 +166,10 @@
         {{ ocp_install_path }}/artifacts/openshift-installer-{{ ocp_release }}/openshift-install create cluster --dir {{ ocp_install_path }}/install/
 
 
+
+- name: OpenShift Post-Install
+  when: ocp_install == "true"
+  block:
     - name: Copy kubeconfig for admin
       shell: "mkdir ~/.kube ; cp {{ ocp_install_path }}/install/auth/kubeconfig ~/.kube/config "
 
@@ -156,6 +189,35 @@
 
 
 
+
+
+    - name: Create post-installation directory
+      file:
+        path: "{{ ocp_install_path }}/post-install"
+        state: directory
+
+
+    - name: Copy post-install scripts
+      copy:
+        src: "scripts/"
+        dest: "{{ ocp_install_path }}/post-install/"
+
+
+
+    - name: Configure Registry Storage (NFS)
+      shell: "cd {{ ocp_install_path }}/post-install/nfs-registry/  ; chmod +x run.sh ; ./run.sh "
+      when: nfs_storage  == "true" 
+
+
+    - name: Configure Registry Storage (Ephemeral)
+      shell: |
+        oc patch configs.imageregistry.operator.openshift.io cluster --type merge --patch '{"spec":{"storage":{"emptyDir":{}}}}'
+      when: nfs_storage  != "true"
+
+
+    - name: Configure Local users
+      shell: "cd {{ ocp_install_path }}/post-install/authentication/  ; chmod +x run.sh ; ./run.sh "
+      when: ocp_create_users  == "true" 
 
 
 
