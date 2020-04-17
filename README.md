@@ -1,9 +1,3 @@
-NOTE about using a single Master
-=====================
-
-in OCP 4.4 there is a BUG that prevents the installation to complete when using one master instead of 3. I will try to fix this in the future.
-
-
 Why you will want to use this repo?
 =====================
 
@@ -11,14 +5,14 @@ Imaging that you have a PC/Laptop (with a good amount of RAM and CPU) running Fe
 
 You can choose to run a full OpenShift installation (with 3 masters and 2+ nodes) or just 3 masters with no workers, or a single VM all-in-one*
 
-*NOTE: Using OCP 4.4 there have been a change on how the ETCD cluster is managed and right now there is a BUG that is preventing all-in-one deployments, as explained in the previous section.
+*NOTE: VM must have more than 12GB and 4CPUs.
 
 OpenShift libvirt IPI
 =====================
 
 The scripts will make use of libvirt IPI installation, steps are based on https://github.com/openshift/installer/blob/master/docs/dev/libvirt/README.md
 
-It will use by default 7GB of RAM and 4 vcores per node (minimum 2 nodes, so 14GB of RAM and 8 threads/cores). Bear in mind that you will need +2GB and 2 cores for bootstrap while installing. 
+It will use by default 10GB of RAM and 4 vcores per node (minimum 2 nodes, so 14GB of RAM and 8 threads/cores). Bear in mind that you will need +2GB and 2 cores for bootstrap while installing. 
 
 If you don't have enough resources to run the 3 masters 2 workers setup, you could configure just 1 master and X workers (scripts will change automatically the manifest to make it work) or even just 1 master and 0 workers (All-in-One setup), but in that case increase the default memory per node (7GB could not be enough to run everything).
 
@@ -65,10 +59,12 @@ Other configs
 
 The ansible playbooks will configure kvm as a previous step to the openshift install. You can skip this by changing the `kvm_install` and `kvm_configure` to `false` in the file config/inventory under the `[kvm:vars]` section.
 
-If you have enough CPU and RAM you can change the default resources configuring `vms_memory` and `vms_vcpu` under the `[installer:vars]` section (16GB would be a nice amount of memory instead of 7GB per VM).
+If you have enough CPU and RAM you can change the default resources configuring `ocp_master_memory`, `ocp_master_cpu`, `ocp_worker_memory` and `ocp_worker_cpu` under the `[installer:vars]` section (16GB would be a nice amount of memory instead of 10GB per VM).
 
 By default NFS storage and a storageclass for dynamic PV provisioning (no supported in Openshift, but it works for testing) will be configured. You can disable it by changing `nfs_storage` variable to `false` in the inventory. In that case ephemeral storage will be configured in the internal registry and you won't have dynamic provisioning. You could want to avoid configuring NFS if, for example, you want to install on a laptop and you don't want to install anything else (nfs = true will install and configure the NFS server on the node serving libvirt)
 
 In the same manner, you can disable the configuration of the load balance service (default is on, so haproxy will be installed on the host) by changing `lb` to `false` in the `[kvm:vars]` section of the inventory.
 
 Local users will be created (ie. clusteradmin / R3dhat01). You can disable it by configuring `ocp_create_users` to `false` 
+
+If you don't want to "publish" the OCP and let it local, you can prevent to configure the iptables by changing `kvm_publish` to `false` in the inventory file.

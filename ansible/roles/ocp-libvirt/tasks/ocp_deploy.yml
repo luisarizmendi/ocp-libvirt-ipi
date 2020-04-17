@@ -26,11 +26,12 @@
 
 
 
-#    - name: Build the Openshift installer with libvirt support
-#      shell: |
-#        sed -i 's/.*DomainMemory.*/                DomainMemory: {{ vms_memory }},/g' {{ ansible_env.HOME }}/go/src/github.com/openshift/installer/pkg/asset/machines/libvirt/machines.go
-#        sed -i 's/.*DomainVcpu.*/                DomainVcpu: {{ vms_vcpu }},/g' {{ ansible_env.HOME }}/go/src/github.com/openshift/installer/pkg/asset/machines/libvirt/machines.go
-
+    - name: Change timeouts to 180m
+      shell: |
+        sed -i 's/apiTimeout := 20/apiTimeout := 180/g' {{ ansible_env.HOME }}/go/src/github.com/openshift/installer/cmd/openshift-install/create.go
+        sed -i 's/timeout := 40/timeout := 180/g' {{ ansible_env.HOME }}/go/src/github.com/openshift/installer/cmd/openshift-install/create.go
+        sed -i 's/timeout := 30/timeout := 180/g' {{ ansible_env.HOME }}/go/src/github.com/openshift/installer/cmd/openshift-install/create.go
+        sed -i 's/consoleRouteTimeout := 10/consoleRouteTimeout := 60/g' {{ ansible_env.HOME }}/go/src/github.com/openshift/installer/cmd/openshift-install/create.go
 
     - name: Build the Openshift installer with libvirt support
       shell: |
