@@ -228,8 +228,6 @@
         iptables -D PREROUTING -t nat -i {{ kvm_interface }} -p tcp --dport 80 -j DNAT --to $APPS_VIP:80
         iptables -D FORWARD -p tcp -d $APPS_VIP --dport 80 -j ACCEPT
         iptables -D FORWARD -i any -o any -j ACCEPT
-        iptables -D FORWARD 5
-        iptables -D FORWARD 4
         iptables -I FORWARD 1 -i any -o any -j ACCEPT
         iptables -I PREROUTING 1 -t nat -i {{ kvm_interface }} -p tcp --dport 6443 -j DNAT --to $API_VIP:6443
         iptables -I FORWARD 1 -p tcp -d $API_VIP --dport 6443 -j ACCEPT
@@ -240,6 +238,8 @@
         iptables -I INPUT 1 -p tcp  --dport 6443 -j ACCEPT
         iptables -I INPUT 1 -p tcp  --dport 443 -j ACCEPT
         iptables -I INPUT 1 -p tcp  --dport 80 -j ACCEPT
+        #iptables -D FORWARD 5
+        #iptables -D FORWARD 4
         iptables-save > /etc/iptables.conf
       when: kvm_firewall == "iptables"
 
@@ -330,7 +330,7 @@
 
     - name: Configure DNS external servers
       shell: 'echo "nameserver 8.8.8.8" >> /etc/resolv.conf'
-      
+
  #   - name: restart network
  #     become: true
  #     systemd:

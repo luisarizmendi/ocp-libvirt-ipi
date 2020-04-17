@@ -1,9 +1,7 @@
 NOTE about using a single Master
 =====================
 
-in OCP 4.4 there is a BUG that prevents the installation to complete when using one master instead of 3. You can workaround with manual steps while deploying:
-
-https://bugzilla.redhat.com/show_bug.cgi?id=1805034
+in OCP 4.4 there is a BUG that prevents the installation to complete when using one master instead of 3. I will try to fix this in the future.
 
 
 Why you will want to use this repo?

@@ -172,7 +172,7 @@
     # With overrides
       shell: |
         ############# BUG https://bugzilla.redhat.com/show_bug.cgi?id=1805034
-        {{ ocp_install_path }}/single-master-patch.sh &
+        #{{ ocp_install_path }}/single-master-patch.sh &
         #############
         export OPENSHIFT_INSTALL_RELEASE_IMAGE_OVERRIDE={{ ocp_install_install_release_image_override }}
         {{ ocp_install_path }}/artifacts/openshift-installer-{{ ocp_release }}/openshift-install create cluster --dir {{ ocp_install_path }}/install/
