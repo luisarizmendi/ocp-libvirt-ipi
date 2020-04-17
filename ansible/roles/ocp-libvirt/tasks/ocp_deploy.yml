@@ -4,6 +4,7 @@
 # We need to compile with libvirt support since it's not included by default (it's in development)
 - name: Compile OpenShift installer (libvirt is in development)
   when: ocp_prepare == "true"
+  tags: install
   block:
     - name: Install dependecies
       become: true
@@ -42,6 +43,7 @@
 
 - name: Prepare OpenShift installation
   when: ocp_prepare == "true"
+  tags: install
   block:
     - name: Create installation directory
       file:
@@ -119,6 +121,7 @@
 
 - name: Install OpenShift
   when: ocp_install == "true"
+  tags: install
   block:
 
 
@@ -126,7 +129,7 @@
       shell: |
         {{ ocp_install_path }}/artifacts/openshift-installer-{{ ocp_release }}/openshift-install create manifests --dir {{ ocp_install_path }}/install/
 
-## NOTE: We need to modify manifests because of https://github.com/openshift/installer/issues/1007 otherwise the console won't come up
+    ## NOTE: We need to modify manifests because of https://github.com/openshift/installer/issues/1007 otherwise the console won't come up
     - name:  Configure manifests to solve issue 1007
       shell: |
         sed -i 's/{{ metadata.name }}.//' {{ ocp_install_path }}/install//manifests/cluster-ingress-02-config.yml
@@ -180,6 +183,7 @@
 
 - name: OpenShift Post-Install
   when: ocp_install == "true"
+  tags: install
   block:
     - name: Copy kubeconfig for admin
       shell: "mkdir ~/.kube ; cp {{ ocp_install_path }}/install/auth/kubeconfig ~/.kube/config "

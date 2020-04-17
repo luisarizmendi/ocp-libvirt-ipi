@@ -7,7 +7,7 @@
 # INSTALL OPENSHIFT
 ########################################
 cd ansible
-ansible-playbook -vv -i ../config/inventory ocp_install.yaml
+ansible-playbook -vv -i ../config/inventory --tags "install" ocp_libvirt.yaml
 cd ..
 
 ########################################

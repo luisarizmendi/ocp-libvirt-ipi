@@ -15,6 +15,8 @@ kvm_interface: "eth0"
 nfs_storage: "true"
 lb: "true"
 
+kvm_publish: "false"
+
 #########################################################
 ## OCP install config
 ocp_prepare: "false"

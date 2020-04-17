@@ -3,6 +3,7 @@
 - name: Install KVM
   when: kvm_install  == "true"
   become: true
+  tags: install
   block:
     - name: Installing KVM Packages
       yum:
@@ -148,6 +149,7 @@
 - name: Prepare KVM
   when: kvm_configure  == "true"
   become: true
+  tags: install
   block:
     - name: Enable IP Forwarding
       shell: "sysctl net.ipv4.ip_forward=1"
@@ -204,42 +206,6 @@
         iptables -D INPUT -p tcp -s {{ hostvars['installer-host']['ansible_host'] }} -d {{ hostvars['kvm-host']['ansible_host'] }} --dport 16509 -j ACCEPT -m comment --comment 'Allow insecure libvirt clients'
         iptables -I INPUT 1 -p tcp -s 192.168.126.0/24 -d {{ kvm_libvirt_network_gw }} -j ACCEPT -m comment --comment 'Allow insecure libvirt clients'
         iptables -I INPUT 1 -p tcp -s {{ hostvars['installer-host']['ansible_host'] }} -d {{ hostvars['kvm-host']['ansible_host'] }} --dport 16509 -j ACCEPT -m comment --comment 'Allow insecure libvirt clients'
-        # Publishing
-        if [ {{ compute.0.replicas }} -ne 0 ]
-        then
-          API_VIP={{ ocp_api_vip }}
-          APPS_VIP={{ ocp_apps_vip }}
-        else
-          API_VIP={{ ocp_api_vip }}
-          APPS_VIP={{ ocp_api_vip }}
-        fi
-        if [ {{ lb }} == "true" ]
-        then
-          API_VIP={{ ocp_cluster_net_gw }}
-          APPS_VIP={{ ocp_cluster_net_gw }}
-        fi
-        iptables -D INPUT -p tcp  --dport 6443 -j ACCEPT
-        iptables -D INPUT -p tcp  --dport 80 -j ACCEPT
-        iptables -D INPUT -p tcp  --dport 443 -j ACCEPT
-        iptables -D PREROUTING -t nat -i {{ kvm_interface }} -p tcp --dport 6443 -j DNAT --to $API_VIP:6443
-        iptables -D FORWARD -p tcp -d $API_VIP --dport 6443 -j ACCEPT
-        iptables -D PREROUTING -t nat -i {{ kvm_interface }} -p tcp --dport 443 -j DNAT --to $APPS_VIP:443
-        iptables -D FORWARD -p tcp -d $APPS_VIP --dport 443 -j ACCEPT
-        iptables -D PREROUTING -t nat -i {{ kvm_interface }} -p tcp --dport 80 -j DNAT --to $APPS_VIP:80
-        iptables -D FORWARD -p tcp -d $APPS_VIP --dport 80 -j ACCEPT
-        iptables -D FORWARD -i any -o any -j ACCEPT
-        iptables -I FORWARD 1 -i any -o any -j ACCEPT
-        iptables -I PREROUTING 1 -t nat -i {{ kvm_interface }} -p tcp --dport 6443 -j DNAT --to $API_VIP:6443
-        iptables -I FORWARD 1 -p tcp -d $API_VIP --dport 6443 -j ACCEPT
-        iptables -I PREROUTING 1 -t nat -i {{ kvm_interface }} -p tcp --dport 443 -j DNAT --to $APPS_VIP:443
-        iptables -I FORWARD 1 -p tcp -d $APPS_VIP --dport 443 -j ACCEPT
-        iptables -I PREROUTING 1  -t nat -i {{ kvm_interface }} -p tcp --dport 80 -j DNAT --to $APPS_VIP:80
-        iptables -I FORWARD 1 -p tcp -d $APPS_VIP --dport 80 -j ACCEPT
-        iptables -I INPUT 1 -p tcp  --dport 6443 -j ACCEPT
-        iptables -I INPUT 1 -p tcp  --dport 443 -j ACCEPT
-        iptables -I INPUT 1 -p tcp  --dport 80 -j ACCEPT
-        #iptables -D FORWARD 5
-        #iptables -D FORWARD 4
         iptables-save > /etc/iptables.conf
       when: kvm_firewall == "iptables"
 
@@ -289,7 +255,7 @@
         mode: '0755'
 
 
-## NOTE: We configure .apps.{{ baseDomain }}/{{ ocp_apps_vip  }} instead of .apps.{{ metadata.name }}.{{ baseDomain }}/{{ ocp_apps_vip  }} because of https://github.com/openshift/installer/issues/1007
+     ## NOTE: We configure .apps.{{ baseDomain }}/{{ ocp_apps_vip  }} instead of .apps.{{ metadata.name }}.{{ baseDomain }}/{{ ocp_apps_vip  }} because of https://github.com/openshift/installer/issues/1007
 
 
     - name: DNS config without lb
