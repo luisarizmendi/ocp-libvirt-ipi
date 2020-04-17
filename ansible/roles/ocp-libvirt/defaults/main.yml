@@ -30,9 +30,11 @@ ocp_release: "4.4.0"
 
 
 
-vms_memory: 7168
-vms_vcpu: 4
+ocp_master_memory: 16384
+ocp_master_cpu: 4
 
+ocp_worker_memory: 16384
+ocp_worker_cpu: 4
 
 
 ## This is fixed right not, do not change

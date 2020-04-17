@@ -16,6 +16,7 @@
   become: true
   block:
     - name:  Unpublish
+      ignore_errors: yes
       shell: |
         set -x
         # Unpublishing

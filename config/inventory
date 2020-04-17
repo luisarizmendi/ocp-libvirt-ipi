@@ -24,8 +24,13 @@ ocp_release="4.4.0-rc.8"
 ocp_git_branch=release-4.4
 ocp_install_install_release_image_override="quay.io/openshift-release-dev/ocp-release:4.4.0-rc.8-x86_64"
 
-vms_memory=10240
-vms_vcpu=4
+
+ocp_master_memory=16384
+ocp_master_cpu=4
+
+ocp_worker_memory=10240
+ocp_worker_cpu=4
+
 
 nfs_storage="true"
 

@@ -26,10 +26,10 @@
 
 
 
-    - name: Build the Openshift installer with libvirt support
-      shell: |
-        sed -i 's/.*DomainMemory.*/                DomainMemory: {{ vms_memory }},/g' {{ ansible_env.HOME }}/go/src/github.com/openshift/installer/pkg/asset/machines/libvirt/machines.go
-        sed -i 's/.*DomainVcpu.*/                DomainVcpu: {{ vms_vcpu }},/g' {{ ansible_env.HOME }}/go/src/github.com/openshift/installer/pkg/asset/machines/libvirt/machines.go
+#    - name: Build the Openshift installer with libvirt support
+#      shell: |
+#        sed -i 's/.*DomainMemory.*/                DomainMemory: {{ vms_memory }},/g' {{ ansible_env.HOME }}/go/src/github.com/openshift/installer/pkg/asset/machines/libvirt/machines.go
+#        sed -i 's/.*DomainVcpu.*/                DomainVcpu: {{ vms_vcpu }},/g' {{ ansible_env.HOME }}/go/src/github.com/openshift/installer/pkg/asset/machines/libvirt/machines.go
 
 
     - name: Build the Openshift installer with libvirt support
@@ -128,6 +128,17 @@
     - name:  Create manifests
       shell: |
         {{ ocp_install_path }}/artifacts/openshift-installer-{{ ocp_release }}/openshift-install create manifests --dir {{ ocp_install_path }}/install/
+
+    - name: Configure Custom resources for Masters and Workers
+      shell: |
+        sed -i 's/.*domainMemory.*/      domainMemory: {{ ocp_master_memory }}/g' {{ ocp_install_path }}/install/openshift/99_openshift-cluster-api_master-machines-0.yaml
+        sed -i 's/.*domainVcpu.*/      domainVcpu: {{ ocp_master_cpu }}/g' {{ ocp_install_path }}/install/openshift/99_openshift-cluster-api_master-machines-0.yaml
+        sed -i 's/.*domainMemory.*/          domainMemory: {{ ocp_worker_memory }}/g' {{ ocp_install_path }}/install/openshift/99_openshift-cluster-api_worker-machineset-0.yaml
+        sed -i 's/.*domainVcpu.*/          domainVcpu: {{ ocp_worker_cpu }}/g' {{ ocp_install_path }}/install/openshift/99_openshift-cluster-api_worker-machineset-0.yaml
+
+
+
+
 
     ## NOTE: We need to modify manifests because of https://github.com/openshift/installer/issues/1007 otherwise the console won't come up
     - name:  Configure manifests to solve issue 1007
