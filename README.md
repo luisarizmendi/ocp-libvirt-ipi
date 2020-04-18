@@ -3,7 +3,7 @@ Why you will want to use this repo?
 
 Imaging that you have a PC/Laptop (with a good amount of RAM and CPU) running Fedora or a CentOS7 server and you want to run OpenShift on them, but you don't want to use CodeReady Containers VM (because multiple reasons... but let's say that you want to test the latest bits)... well... that's the use case of this automation.
 
-You can choose to run a full OpenShift installation (with 3 masters and 2+ nodes) or just 3 masters with no workers. The all-in-one with OCP4 deployement most of the time fails (even when including manual patch shown in BUG 1805034), I still need to invest some time troubleshooting that...
+You can choose to run a full OpenShift installation (with 3 masters and 2+ nodes), just 3 masters with no workers or just 1 master (all-in-one). The all-in-one setup would need at least 10GB and 4 cores but put as much RAM you can add...
 
 OpenShift libvirt IPI
 =====================
@@ -32,7 +32,7 @@ In install-config.yaml
 * KVM IP and bridge name (optional)
 * Cluster name and Domain (if your KVM is not local you can setup a < ip >.nip.io domain if you don't have a "real" domain name)
 * Public ssh key
-* Number of masters (3, since single master is failing randomly) and workers (0,1,2...or more. In case than more than 2 workers are deployed there is a chance that the router won't run on the first worker node where the iptables are forwarding, in that case you better have a the loadbalancer configured)
+* Number of masters (1 or 3) and workers (0,1,2...or more. In case than more than 2 workers are deployed there is a chance that the router won't run on the first worker node where the iptables are forwarding, in that case you better have a the loadbalancer configured)
 
 In inventory
 

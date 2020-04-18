@@ -110,10 +110,27 @@
             name: "{{ item }}"
           with_items:
             - nfs-utils
-            - rpcbind
+            - rpcbind     
+
+        - name: Create mountable dirs
+          when: ansible_distribution  == "Fedora"
+          ignore_errors: yes
+          file:
+            path: "{{ item }}"
+            state: directory
+            mode: 0777
+            owner: nobody
+            group: nobody
+          with_items:
+            - /export
+            - /export/ocp/
+            - /export/ocp/static
+            - /export/ocp/static/registry
+            - /export/ocp/dynamic
 
 
         - name: Create mountable dirs
+          when: ansible_distribution  == "CentOS"
           ignore_errors: yes
           file:
             path: "{{ item }}"
