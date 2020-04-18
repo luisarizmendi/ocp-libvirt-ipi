@@ -161,9 +161,7 @@
 #                  name: etcd-quorum-guard
 #                  namespace: openshift-machine-config-operator
 #                  unmanaged: true
-#        - name:  Reduce ETCD replicas
-#          shell: |
-#            echo ""
+
 
 #    - name: No Workers configuration
 #      when: compute.0.replicas == 0
