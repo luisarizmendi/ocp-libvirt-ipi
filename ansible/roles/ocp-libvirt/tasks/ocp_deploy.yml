@@ -33,6 +33,13 @@
         sed -i 's/timeout := 30/timeout := 180/g' {{ ansible_env.HOME }}/go/src/github.com/openshift/installer/cmd/openshift-install/create.go
         sed -i 's/consoleRouteTimeout := 10/consoleRouteTimeout := 60/g' {{ ansible_env.HOME }}/go/src/github.com/openshift/installer/cmd/openshift-install/create.go
 
+
+    - name: FIX master disk in code (Right now there is no other way)
+      shell: |
+        SIZE=$(({{ ocp_master_disk }}*1073741824))
+        sed -i "s/resource \"libvirt_volume\" \"master\" {/resource \"libvirt_volume\" \"master\" {\n  size           = ${SIZE}/g" {{ ansible_env.HOME }}/go/src/github.com/openshift/installer/data/data/libvirt/main.tf
+
+
     - name: Build the Openshift installer with libvirt support
       shell: |
         cd {{ ansible_env.HOME }}/go/src/github.com/openshift/installer/
@@ -132,8 +139,12 @@
 
     - name: Configure Custom resources for Masters and Workers
       shell: |
+        MASTER_DISK_SIZE=$(({{ ocp_master_disk }}*1073741824)) # This is fixed in code but someday it will be possible to do it here
+        WORKER_DISK_SIZE=$(({{ ocp_worker_disk }}*1073741824))
+        sed -i "s/volume:/volume:\n        volumeSize: ${MASTER_DISK_SIZE}/g" {{ ocp_install_path }}/install/openshift/99_openshift-cluster-api_master-machines-0.yaml
         sed -i 's/.*domainMemory.*/      domainMemory: {{ ocp_master_memory }}/g' {{ ocp_install_path }}/install/openshift/99_openshift-cluster-api_master-machines-0.yaml
         sed -i 's/.*domainVcpu.*/      domainVcpu: {{ ocp_master_cpu }}/g' {{ ocp_install_path }}/install/openshift/99_openshift-cluster-api_master-machines-0.yaml
+        sed -i "s/volume:/volume:\n            volumeSize: ${WORKER_DISK_SIZE}/g" {{ ocp_install_path }}/install/openshift/99_openshift-cluster-api_worker-machineset-0.yaml  
         sed -i 's/.*domainMemory.*/          domainMemory: {{ ocp_worker_memory }}/g' {{ ocp_install_path }}/install/openshift/99_openshift-cluster-api_worker-machineset-0.yaml
         sed -i 's/.*domainVcpu.*/          domainVcpu: {{ ocp_worker_cpu }}/g' {{ ocp_install_path }}/install/openshift/99_openshift-cluster-api_worker-machineset-0.yaml
 

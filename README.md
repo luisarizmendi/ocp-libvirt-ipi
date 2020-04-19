@@ -3,20 +3,19 @@ Why you will want to use this repo?
 
 Imaging that you have a PC/Laptop (with a good amount of RAM and CPU) running Fedora or a CentOS7 server and you want to run OpenShift on them, but you don't want to use CodeReady Containers VM (because multiple reasons... but let's say that you want to test the latest bits)... well... that's the use case of this automation.
 
-You can choose to run a full OpenShift installation (with 3 masters and 2+ nodes), just 3 masters with no workers or just 1 master (all-in-one). The all-in-one setup would need at least 16GB and 4 cores but put as much RAM you can add...
-
 OpenShift libvirt IPI
 =====================
 
 The scripts will make use of libvirt IPI installation, steps are based on https://github.com/openshift/installer/blob/master/docs/dev/libvirt/README.md
 
-It will use by default 16GB of RAM and 4 vcores per node (minimum 2 nodes, so 14GB of RAM and 8 threads/cores). Bear in mind that you will need +2GB and 2 cores for bootstrap while installing. 
+By default, masters will be using 16GB of RAM, 120 GB of disk and 4 vcores per node and workers 8GB of RAM, 120 GB of disk and 2 vcores, those are the minimum requirements according to documentation (16GB of disk is enough if you don't want to use ephemeral). Bear in mind that you will need +2GB and 2 cores for bootstrap while installing. 
 
-This IPI installation won't need that you configure an external load balancer (although you can install it with these scritps), any HTTP server or that you configure SRV in an external DNS, you will need to configure just the api and the apps wildcard (you can always play with the /etc/hosts if you don't have a chance to configure a DNS)
+You can choose to run a full OpenShift installation (with 3 masters and 2+ nodes), just 3 masters with no workers or just 1 master (all-in-one). The all-in-one setup would need at least 16GB and 4 cores but put as much RAM and cores you can add, and also take into account the ephemeral storage, depending if you are going to use NFS or not (see below).
 
-You won't need to configure a Load Balancer because in the KVM an iptables rule will be configured to forward 6443 to first master and 443 and 80 to first worker. That's OK if you are thinking about using 1 master and 1 worker or a all-in-one setup (in case that you don't deploy workers, all traffic will be to first master), but if you plan to have multiple masters and workers, configuring a load balancer is a good idea.
+This IPI installation won't need that you configure an external load balancer (although you can install it with these scritps), any HTTP server or that you configure SRV in an external DNS, you will need to configure just the api and the apps wildcard (you can always play with the /etc/hosts if you don't have a chance to configure a DNS). You won't need to configure a Load Balancer because in the KVM an iptables rule will be configured to forward 6443 to first master and 443 and 80 to first worker. That's OK if you are thinking about using 1 master and 1 worker or a all-in-one setup (in case that you don't deploy workers, all traffic will be to first master), but if you plan to have multiple masters and workers, configuring a load balancer is a good idea.
 
 If you want to run HA tests you will need to install a haproxy and reconfigure that rules to point to the load balancer VIP (see "other configs" section). If you are running the KVM locally, you will get HA for masters since the dnsmasq will round robin the IP bind to the dns name but not for APPS. 
+
 
 One more thing to be taken into account is that due https://github.com/openshift/installer/issues/1007 we need to configure *.apps.basedomain instead of *.apps.< CLUSTERNAME >.basedomain, so bear in mind that change and do not include the cluster name when trying to access your APPs.
 
@@ -55,7 +54,7 @@ Other configs
 
 The ansible playbooks will configure kvm as a previous step to the openshift install. You can skip this by changing the `kvm_install` and `kvm_configure` to `false` in the file config/inventory under the `[kvm:vars]` section.
 
-If you have enough CPU and RAM you can change the default resources configuring `ocp_master_memory`, `ocp_master_cpu`, `ocp_worker_memory` and `ocp_worker_cpu` under the `[installer:vars]` section.
+If you have enough CPU and RAM you can change the default resources configuring `ocp_master_memory`, `ocp_master_cpu`,`ocp_master_disk` (in GB), `ocp_worker_memory`, `ocp_worker_cpu` and `ocp_worker_disk` under the `[installer:vars]` section. If you don't plan to use NFS storage increase as much as possible the node disks (since you will be using ephemeral storage, including the registry that will be automatically configured to do such thing).
 
 By default NFS storage and a storageclass for dynamic PV provisioning (no supported in Openshift, but it works for testing) will be configured. You can disable it by changing `nfs_storage` variable to `false` in the inventory. In that case ephemeral storage will be configured in the internal registry and you won't have dynamic provisioning. You could want to avoid configuring NFS if, for example, you want to install on a laptop and you don't want to install anything else (nfs = true will install and configure the NFS server on the node serving libvirt)
 

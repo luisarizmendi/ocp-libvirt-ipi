@@ -27,10 +27,11 @@ ocp_install_install_release_image_override="quay.io/openshift-release-dev/ocp-re
 
 ocp_master_memory=16384
 ocp_master_cpu=4
+ocp_master_disk=150
 
 ocp_worker_memory=10240
 ocp_worker_cpu=4
-
+ocp_worker_disk=150
 
 nfs_storage="true"
 
