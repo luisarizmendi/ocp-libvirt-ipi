@@ -1,5 +1,13 @@
 #!/bin/bash
 
+echo ""
+echo "Starting at $(date +%R)"
+echo ""
+
+sdate=$(date +%s)
+
+
+
 #sudo yum install -y ansible
 
 
@@ -15,6 +23,12 @@ cd ..
 
 
 
+cdate=$(date +%s)
+duration=$(( $(($cdate-$sdate)) / 60))
+
+echo ""
+echo "Duration (mins): $duration"
+echo ""
 
 
 
