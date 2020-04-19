@@ -45,7 +45,7 @@ oc adm policy add-cluster-role-to-user cluster-admin clusteradmin
 
 
 # Create groups
-oc adm groups new developers user1 user2 user3 user4 user5 user6 user7 user8 user9 user10 user11 user12 user13 user14 user15 user99
+oc adm groups new developers user1 user2 user3 user4 user5 user6 user7 user8 user9 user10 user11 user12 user13 user14 user15 user16 user17 user18 user19 user20 user21 user22 user23 user24 user25
 oc adm groups new reviewers viewuser
 
 

@@ -2,6 +2,7 @@
 
     - name: Configure Iptables
       become: true
+      tags: install
       ignore_errors: yes
       shell: |
         set -x

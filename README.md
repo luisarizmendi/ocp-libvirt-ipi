@@ -61,6 +61,6 @@ By default NFS storage and a storageclass for dynamic PV provisioning (no suppor
 
 In the same manner, you can disable the configuration of the load balance service (default is on, so haproxy will be installed on the host) by changing `lb` to `false` in the `[kvm:vars]` section of the inventory.
 
-Local users will be created (ie. clusteradmin / R3dhat01). You can disable it by configuring `ocp_create_users` to `false` 
+Local users will be created. One clusteradmin (clusteradmin / R3dhat01), 25 users (userXX / R3dhat01) included in a group ´developers´ and one cluster wide read only user (viewuser / R4dhat01) included in a group called `reviewers`. You can disable it by configuring `ocp_create_users` to `false` 
 
 If you don't want to "publish" the OCP and let it local, you can prevent to configure the iptables by changing `kvm_publish` to `false` in the inventory file.
