@@ -103,7 +103,7 @@ Libvirt IPI is not included in the installer software by default. In order to "a
 
 ..but before running that script to make the build, I applied two changes to the code (shown below). 
 
-This is important...wait just for a moment and think about it... you can do all of this because **IT IS OPEN SOURCE**. I would be impossible if we were using close-source Software...
+This is important...wait just for a moment and think about it... you can do all of this because **IT IS OPEN SOURCE**. It would be impossible if we were using close-source Software...
 
 
 ### Custom disk
@@ -191,4 +191,4 @@ Why not all variables are named as this one? We could just get rid of documentat
 
 # Enjoy
 
-That's all, make a responsible use of these playbooks (remember that this is just for LABs) and enjoy the Machine API even when your LAB is running on a single KVM node.
+That's all, make responsible use of these playbooks (remember that this is just for LABs) and enjoy the Machine API even when your LAB is running on a single KVM node.
