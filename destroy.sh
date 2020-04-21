@@ -1,43 +1,35 @@
 #!/bin/bash
 
+
+echo ""
+echo "Starting at $(date +%R)"
+echo ""
+
+sdate=$(date +%s)
+
+
+
+#sudo yum install -y ansible
+
+
 ########################################
-# Remove OPENSHIFT
-########################################
-cd ansible
-ansible-playbook -vv -i ../config/inventory --tags "remove" ocp_libvirt.yaml
-cd ..
-
+# REMOVING OPENSHIFT
 ########################################
 
+#ansible-galaxy install luisarizmendi.ocp_libvirt_ipi_role
+
+ansible-playbook -vv -i inventory --tags remove ocp_libvirt_ipi.yaml
+
+########################################
 
 
 
 
+cdate=$(date +%s)
+duration=$(( $(($cdate-$sdate)) / 60))
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+echo ""
+echo "Duration (mins): $duration"
+echo ""
 
 

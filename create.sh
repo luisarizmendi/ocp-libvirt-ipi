@@ -1,5 +1,6 @@
 #!/bin/bash
 
+
 echo ""
 echo "Starting at $(date +%R)"
 echo ""
@@ -14,9 +15,10 @@ sdate=$(date +%s)
 ########################################
 # INSTALL OPENSHIFT
 ########################################
-cd ansible
-ansible-playbook -vv -i ../config/inventory --tags "install" ocp_libvirt.yaml
-cd ..
+
+ansible-galaxy install luisarizmendi.ocp_libvirt_ipi_role
+
+ansible-playbook -vv -i inventory --tags install ocp_libvirt_ipi.yaml
 
 ########################################
 
@@ -29,32 +31,5 @@ duration=$(( $(($cdate-$sdate)) / 60))
 echo ""
 echo "Duration (mins): $duration"
 echo ""
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 

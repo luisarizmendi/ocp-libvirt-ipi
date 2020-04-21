@@ -1,0 +1,13 @@
+kvm-node ansible_host=< kvm ip > ansible_port=< ssh port > ansible_user=< user with sudo >
+
+
+
+
+
+
+
+
+
+
+
+
