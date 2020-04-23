@@ -16,7 +16,7 @@ sdate=$(date +%s)
 # INSTALL OPENSHIFT
 ########################################
 
-ansible-galaxy install luisarizmendi.ocp_libvirt_ipi_role
+ansible-galaxy install luisarizmendi.ocp_libvirt_ipi_role --force
 
 ansible-playbook -vv -i inventory --tags install ocp_libvirt_ipi.yaml
 
@@ -31,5 +31,3 @@ duration=$(( $(($cdate-$sdate)) / 60))
 echo ""
 echo "Duration (mins): $duration"
 echo ""
-
-
