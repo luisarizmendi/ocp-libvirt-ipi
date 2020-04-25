@@ -1,6 +1,6 @@
 ---
 ## Check release names in https://mirror.openshift.com/pub/openshift-v4/clients/ocp
-
+## Interface name as appears with 'nmcli con show' command
 - hosts: all
   roles:
     - role: luisarizmendi.ocp_libvirt_ipi_role
