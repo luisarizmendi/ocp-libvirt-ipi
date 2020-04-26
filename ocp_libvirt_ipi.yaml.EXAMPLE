@@ -14,4 +14,5 @@
         ocp_worker_cpu: 4
         ocp_worker_disk: 150
         kvm_interface: < kvm interface>
-
+        ocp_users_password: < password >
+        ocp_clusteradmin_password: < password >
