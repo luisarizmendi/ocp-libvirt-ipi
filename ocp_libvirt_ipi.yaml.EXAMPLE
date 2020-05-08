@@ -16,3 +16,4 @@
         kvm_interface: < kvm interface>
         ocp_users_password: < password >
         ocp_clusteradmin_password: < password >
+
