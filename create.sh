@@ -16,6 +16,8 @@ sdate=$(date +%s)
 # INSTALL OPENSHIFT
 ########################################
 
+dnf install -y python3-netaddr
+
 ansible-galaxy install luisarizmendi.ocp_libvirt_ipi_role --force
 
 ansible-playbook -vv -i inventory --tags install ocp_libvirt_ipi.yaml
