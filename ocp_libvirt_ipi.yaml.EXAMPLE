@@ -6,11 +6,11 @@
     - role: luisarizmendi.ocp_libvirt_ipi_role
       vars:
         ocp_install_file_path: "install-config.yaml"
-        ocp_release: "4.4.0-rc.8"
-        ocp_master_memory: 16384
+        ocp_release: "4.7.0"
+        ocp_master_memory: 16
         ocp_master_cpu: 4
         ocp_master_disk: 150
-        ocp_worker_memory: 20480
+        ocp_worker_memory: 20
         ocp_worker_cpu: 4
         ocp_worker_disk: 150
         kvm_interface: < kvm interface>
