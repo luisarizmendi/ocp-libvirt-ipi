@@ -18,9 +18,10 @@ sdate=$(date +%s)
 
 dnf install -y python3-netaddr
 
-ansible-galaxy install luisarizmendi.ocp_libvirt_ipi_role --force
+# ansible-galaxy install luisarizmendi.ocp_libvirt_ipi_role --force
+# see fedora34 branch details of the libvirt IPI ansible role here: https://github.com/eartvit/ocp-libvirt-ipi-role/tree/fedora34
 
-ansible-playbook -vv -i inventory --tags install ocp_libvirt_ipi.yaml
+ansible-playbook -vv -i inventory --tags install ocp_libvirt_ipi.yaml -e "kvm_workdir=<full_path_folder_where_kvm_should_store_files> ansible_become_pass=\'your_sudo_password\'"
 
 ########################################
 
