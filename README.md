@@ -17,6 +17,8 @@ You need to complete the pre-requisites and launch the script...easy.
 
 * You need to create a playbook to import the role and including the variables to customize your environment. A ocp_libvirt_ipi.yaml.EXAMPLE is included to be used as template. For more information about variables you can check the [ansible role README](https://github.com/luisarizmendi/ocp-libvirt-ipi-role)
 
+### Fedora 34 ###
+If you want to install on Fedora 34 checkout [libvirt-ansible-role-fedora34-branch](https://github.com/eartvit/ocp-libvirt-ipi-role/tree/fedora34 "ansible role fedora34 branch") for the ansible role and also the [fedora34-branch](https://github.com/eartvit/ocp-libvirt-ipi/tree/fedora34 "fedora34 branch") for specifics.
 
 ## Creating or destroying the OpenShift environment
 
